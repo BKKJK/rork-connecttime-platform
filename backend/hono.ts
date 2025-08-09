@@ -3,12 +3,20 @@ import { trpcServer } from "@hono/trpc-server";
 import { cors } from "hono/cors";
 import { appRouter } from "./trpc/app-router";
 import { createContext } from "./trpc/create-context";
+import { authRoutes } from "./routes/auth";
 
 // app will be mounted at /api
 const app = new Hono();
 
 // Enable CORS for all routes
-app.use("*", cors());
+app.use("*", cors({
+  origin: (origin) => origin || "*",
+  credentials: true,
+  allowHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Mount auth routes
+app.route("/auth", authRoutes);
 
 // Mount tRPC router at /trpc
 app.use(
