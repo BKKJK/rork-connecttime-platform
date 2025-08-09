@@ -1,8 +1,6 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import createContextHook from '@nkzw/create-context-hook';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { authApi } from '@/lib/auth-api';
 import { User, RegisterPayload, LoginPayload } from '@/types';
 
 interface AuthContextValue {
@@ -16,132 +14,126 @@ interface AuthContextValue {
   clearError: () => void;
 }
 
-export const [AuthProvider, useAuth] = createContextHook((): AuthContextValue => {
+export const [AuthProvider, useAuth] = createContextHook(() => {
   const [error, setError] = useState<string | null>(null);
-  const queryClient = useQueryClient();
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Query to get current user
-  const { 
-    data: user, 
-    isLoading, 
-    error: queryError 
-  } = useQuery({
-    queryKey: ['me'],
-    queryFn: authApi.me,
-    retry: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  });
-
-  // Login mutation
-  const loginMutation = useMutation({
-    mutationFn: authApi.login,
-    onSuccess: (data) => {
-      queryClient.setQueryData(['me'], data.user);
-      setError(null);
-      console.log('Login successful:', data.user.email);
-    },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || 'Login failed';
-      setError(message);
-      console.error('Login error:', message);
-    },
-  });
-
-  // Register mutation
-  const registerMutation = useMutation({
-    mutationFn: authApi.register,
-    onSuccess: (data) => {
-      queryClient.setQueryData(['me'], data.user);
-      setError(null);
-      console.log('Registration successful:', data.user.email);
-    },
-    onError: (error: any) => {
-      const message = error.response?.data?.message || 'Registration failed';
-      setError(message);
-      console.error('Registration error:', message);
-    },
-  });
-
-  // Logout mutation
-  const logoutMutation = useMutation({
-    mutationFn: authApi.logout,
-    onSuccess: () => {
-      queryClient.setQueryData(['me'], null);
-      queryClient.clear(); // Clear all cached data
-      setError(null);
-      console.log('Logout successful');
-    },
-    onError: (error: any) => {
-      // Even if logout fails on server, clear local state
-      queryClient.setQueryData(['me'], null);
-      queryClient.clear();
-      const message = error.response?.data?.message || 'Logout failed';
-      console.error('Logout error:', message);
-    },
-  });
-
-  // Store user in AsyncStorage for offline access
+  // Load user from AsyncStorage on startup (fallback when API is not available)
   useEffect(() => {
-    if (user) {
-      AsyncStorage.setItem('lastUser', JSON.stringify(user));
-    } else {
-      AsyncStorage.removeItem('lastUser');
-    }
-  }, [user]);
-
-  // Load last user from storage on app start (for offline display)
-  useEffect(() => {
-    const loadLastUser = async () => {
+    const loadUser = async () => {
       try {
-        const lastUser = await AsyncStorage.getItem('lastUser');
-        if (lastUser && !user && !isLoading) {
-          // Only use cached user if we don't have fresh data
-          console.log('Loaded cached user data');
+        const userData = await AsyncStorage.getItem('user');
+        if (userData) {
+          setUser(JSON.parse(userData));
         }
       } catch (error) {
-        console.error('Error loading cached user:', error);
+        console.error('Error loading user from storage:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
     
-    loadLastUser();
-  }, [user, isLoading]);
+    loadUser();
+  }, []);
 
-  // Combine loading states
-  const combinedLoading = isLoading || 
-    loginMutation.isPending || 
-    registerMutation.isPending || 
-    logoutMutation.isPending;
-
-  // Combine errors
-  const combinedError = error || 
-    (queryError as any)?.response?.data?.message || 
-    (queryError as any)?.message;
-
-  const clearError = () => setError(null);
-
-  const login = async (payload: LoginPayload): Promise<void> => {
+  // Mock login function (fallback when API is not available)
+  const mockLogin = useCallback(async (payload: LoginPayload) => {
+    const mockUser: User = {
+      id: '1',
+      name: 'John Doe',
+      email: payload.email,
+      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+      role: 'client',
+      email_verified: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    
+    await AsyncStorage.setItem('user', JSON.stringify(mockUser));
+    setUser(mockUser);
     setError(null);
-    await loginMutation.mutateAsync(payload);
-  };
+    console.log('Mock login successful:', mockUser.email);
+  }, []);
 
-  const register = async (payload: RegisterPayload): Promise<void> => {
+  // Mock register function (fallback when API is not available)
+  const mockRegister = useCallback(async (payload: RegisterPayload) => {
+    const mockUser: User = {
+      id: Date.now().toString(),
+      name: payload.name,
+      email: payload.email,
+      avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face',
+      role: payload.role,
+      email_verified: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    
+    await AsyncStorage.setItem('user', JSON.stringify(mockUser));
+    setUser(mockUser);
     setError(null);
-    await registerMutation.mutateAsync(payload);
-  };
+    console.log('Mock registration successful:', mockUser.email);
+  }, []);
 
-  const logout = async (): Promise<void> => {
+  // Mock logout function (fallback when API is not available)
+  const mockLogout = useCallback(async () => {
+    await AsyncStorage.removeItem('user');
+    setUser(null);
     setError(null);
-    await logoutMutation.mutateAsync();
-  };
+    console.log('Mock logout successful');
+  }, []);
 
-  return {
-    user: user || null,
-    isLoading: combinedLoading,
+
+
+  const clearError = useCallback(() => setError(null), []);
+
+  const login = useCallback(async (payload: LoginPayload): Promise<void> => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await mockLogin(payload);
+    } catch (err) {
+      setError('Login failed');
+      console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [mockLogin]);
+
+  const register = useCallback(async (payload: RegisterPayload): Promise<void> => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await mockRegister(payload);
+    } catch (err) {
+      setError('Registration failed');
+      console.error('Registration error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [mockRegister]);
+
+  const logout = useCallback(async (): Promise<void> => {
+    setError(null);
+    setIsLoading(true);
+    try {
+      await mockLogout();
+    } catch (err) {
+      setError('Logout failed');
+      console.error('Logout error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [mockLogout]);
+
+  return useMemo((): AuthContextValue => ({
+    user,
+    isLoading,
     isAuthenticated: !!user,
     login,
     register,
     logout,
-    error: combinedError,
+    error,
     clearError,
-  };
+  }), [user, isLoading, login, register, logout, error, clearError]);
 });
