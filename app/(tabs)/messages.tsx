@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MessageCircle } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { Card } from '@/components/ui/Card';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const mockMessages = [
   {
