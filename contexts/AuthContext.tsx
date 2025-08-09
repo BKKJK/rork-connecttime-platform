@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
-import createContextHook from '@nkzw/create-context-hook';
+import React, { useState, useEffect, useMemo, useCallback, createContext, useContext } from 'react';
 import { User, RegisterPayload, LoginPayload } from '@/types';
 import { authApi } from '@/lib/auth-api';
 
@@ -14,7 +13,9 @@ interface AuthContextValue {
   clearError: () => void;
 }
 
-export const [AuthProvider, useAuth] = createContextHook(() => {
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,8 +27,8 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
         const userData = await authApi.me();
         setUser(userData);
         console.log('User loaded from API:', userData.email);
-      } catch (error) {
-        console.log('No authenticated user found');
+      } catch (error: any) {
+        console.log('No authenticated user found or backend unavailable:', error.message);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -89,7 +90,7 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     }
   }, []);
 
-  return useMemo((): AuthContextValue => ({
+  const value = useMemo((): AuthContextValue => ({
     user,
     isLoading,
     isAuthenticated: !!user,
@@ -99,4 +100,18 @@ export const [AuthProvider, useAuth] = createContextHook(() => {
     error,
     clearError,
   }), [user, isLoading, login, register, logout, error, clearError]);
-});
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = (): AuthContextValue => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
