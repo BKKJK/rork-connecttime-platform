@@ -14,7 +14,7 @@ import {
 import { Colors } from '@/constants/colors';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/contexts/AuthContext';
 
 const menuItems = [
   { icon: Calendar, title: 'My Bookings', subtitle: 'View upcoming and past sessions' },
@@ -68,17 +68,17 @@ export default function ProfileScreen() {
 
         <Card style={styles.profileCard}>
           <View style={styles.profileHeader}>
-            <Image source={{ uri: user?.avatar }} style={styles.avatar} />
+            <Image source={{ uri: user?.avatar_url }} style={styles.avatar} />
             <View style={styles.profileInfo}>
               <View style={styles.nameRow}>
                 <Text style={styles.name}>{user?.name}</Text>
-                {user?.verified && (
+                {user?.email_verified && (
                   <Shield size={16} color={Colors.primary} />
                 )}
               </View>
               <Text style={styles.email}>{user?.email}</Text>
               <Text style={styles.userType}>
-                {user?.type === 'provider' ? 'Provider' : 'Client'}
+                {user?.role === 'provider' ? 'Provider' : 'Client'}
               </Text>
             </View>
           </View>
