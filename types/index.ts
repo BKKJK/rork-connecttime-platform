@@ -1,0 +1,54 @@
+export interface Provider {
+  id: string;
+  name: string;
+  avatar: string;
+  bio: string;
+  description: string;
+  categories: string[];
+  hourlyRate: number;
+  rating: number;
+  reviewCount: number;
+  location: string;
+  verified: boolean;
+  availability: string[];
+  sessionTypes: ('in-person' | 'video' | 'phone')[];
+  gallery: string[];
+}
+
+export interface Service {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  color: string;
+}
+
+export interface Booking {
+  id: string;
+  providerId: string;
+  provider: Provider;
+  date: string;
+  time: string;
+  duration: number;
+  sessionType: 'in-person' | 'video' | 'phone';
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  totalAmount: number;
+}
+
+export interface Review {
+  id: string;
+  clientName: string;
+  rating: number;
+  comment: string;
+  date: string;
+  verified: boolean;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  type: 'client' | 'provider';
+  verified: boolean;
+}
