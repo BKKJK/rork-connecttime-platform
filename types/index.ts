@@ -48,7 +48,44 @@ export interface User {
   id: string;
   name: string;
   email: string;
-  avatar: string;
-  type: 'client' | 'provider';
-  verified: boolean;
+  avatar_url?: string;
+  role: 'client' | 'provider';
+  email_verified: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+// Auth API Types
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  role: 'client' | 'provider';
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
+export interface UserResponse {
+  user: User;
+}
+
+export interface AuthError {
+  message: string;
+  field?: string;
+}
+
+export interface VerifyEmailPayload {
+  token: string;
+}
+
+export interface RequestResetPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  password: string;
 }
