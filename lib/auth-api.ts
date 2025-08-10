@@ -102,43 +102,68 @@ export const authApi = {
   // Register a new user
   register: async (payload: RegisterPayload): Promise<UserResponse> => {
     try {
+      console.log('Attempting backend registration for:', payload.email);
       const response = await api.post('/api/auth/register', payload);
+      console.log('Backend registration successful');
       return response.data;
     } catch (error: any) {
-      console.log('Backend unavailable, using mock auth:', error.message);
-      return await mockAuth.register(payload);
+      if (error.isNetworkError || error.code === 'ECONNREFUSED' || !error.response) {
+        console.log('Backend unavailable, using mock auth for registration');
+        return await mockAuth.register(payload);
+      }
+      // Re-throw API errors (validation, user exists, etc.)
+      throw error;
     }
   },
 
   // Login user
   login: async (payload: LoginPayload): Promise<UserResponse> => {
     try {
+      console.log('Attempting backend login for:', payload.email);
       const response = await api.post('/api/auth/login', payload);
+      console.log('Backend login successful');
       return response.data;
     } catch (error: any) {
-      console.log('Backend unavailable, using mock auth:', error.message);
-      return await mockAuth.login(payload);
+      if (error.isNetworkError || error.code === 'ECONNREFUSED' || !error.response) {
+        console.log('Backend unavailable, using mock auth for login');
+        return await mockAuth.login(payload);
+      }
+      // Re-throw API errors (invalid credentials, etc.)
+      throw error;
     }
   },
 
   // Get current user (from JWT cookie)
   me: async (): Promise<User> => {
     try {
+      console.log('Attempting to get current user from backend');
       const response = await api.get('/api/auth/me');
+      console.log('Backend me() successful');
       return response.data.user;
     } catch (error: any) {
-      console.log('Backend unavailable, using mock auth:', error.message);
-      return await mockAuth.me();
+      if (error.isNetworkError || error.code === 'ECONNREFUSED' || !error.response) {
+        console.log('Backend unavailable, using mock auth for me()');
+        return await mockAuth.me();
+      }
+      // Re-throw API errors (not authenticated, etc.)
+      throw error;
     }
   },
 
   // Logout user
   logout: async (): Promise<void> => {
     try {
+      console.log('Attempting backend logout');
       await api.post('/api/auth/logout');
+      console.log('Backend logout successful');
     } catch (error: any) {
-      console.log('Backend unavailable, using mock auth:', error.message);
+      if (error.isNetworkError || error.code === 'ECONNREFUSED' || !error.response) {
+        console.log('Backend unavailable for logout, using mock auth');
+      } else {
+        console.error('Logout error:', error);
+      }
     }
+    // Always clear mock auth regardless of backend status
     await mockAuth.logout();
   },
 

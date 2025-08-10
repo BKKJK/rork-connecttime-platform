@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, createContext, useContext } from 'react';
 import { User, RegisterPayload, LoginPayload } from '@/types';
 import { authApi } from '@/lib/auth-api';
+import { healthCheck } from '@/lib/api';
 
 interface AuthContextValue {
   user: User | null;
@@ -24,6 +25,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const loadUser = async () => {
       try {
+        console.log('Loading user on app startup...');
+        
+        // Check if backend is available
+        const isBackendHealthy = await healthCheck();
+        if (isBackendHealthy) {
+          console.log('Backend is healthy, attempting to load user');
+        } else {
+          console.log('Backend health check failed, will use mock auth if needed');
+        }
+        
         const userData = await authApi.me();
         setUser(userData);
         console.log('User loaded from API:', userData.email);
@@ -38,17 +49,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loadUser();
   }, []);
 
-  const clearError = useCallback(() => setError(null), []);
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
 
   const login = useCallback(async (payload: LoginPayload): Promise<void> => {
     setError(null);
     setIsLoading(true);
     try {
+      console.log('Attempting login for:', payload.email);
       const response = await authApi.login(payload);
       setUser(response.user);
       console.log('Login successful:', response.user.email);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Login failed';
+      let errorMessage = 'Login failed';
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
       setError(errorMessage);
       console.error('Login error:', err);
       throw err;
@@ -61,11 +80,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     setIsLoading(true);
     try {
+      console.log('Attempting registration for:', payload.email);
       const response = await authApi.register(payload);
       setUser(response.user);
       console.log('Registration successful:', response.user.email);
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Registration failed';
+      let errorMessage = 'Registration failed';
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
       setError(errorMessage);
       console.error('Registration error:', err);
       throw err;
@@ -78,11 +103,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setError(null);
     setIsLoading(true);
     try {
+      console.log('Attempting logout...');
       await authApi.logout();
       setUser(null);
       console.log('Logout successful');
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error || 'Logout failed';
+      let errorMessage = 'Logout failed';
+      if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
       setError(errorMessage);
       console.error('Logout error:', err);
     } finally {

@@ -50,11 +50,14 @@ function verifyPassword(password: string, hash: string): boolean {
 // Register endpoint
 authRoutes.post("/register", zValidator("json", registerSchema), async (c) => {
   try {
+    console.log('Register endpoint called');
     const { name, email, password, role } = c.req.valid("json");
+    console.log('Registration data:', { name, email, role });
     
     // Check if user already exists
     const existingUser = users.find(u => u.email === email);
     if (existingUser) {
+      console.log('User already exists:', email);
       return c.json({ error: "User with this email already exists" }, 400);
     }
     
@@ -73,6 +76,7 @@ authRoutes.post("/register", zValidator("json", registerSchema), async (c) => {
     
     users.push(newUser);
     userIdCounter++;
+    console.log('User created:', newUser.id, newUser.email);
     
     // Generate JWT token
     const token = await sign({ userId: newUser.id, email: newUser.email }, JWT_SECRET);
@@ -87,11 +91,12 @@ authRoutes.post("/register", zValidator("json", registerSchema), async (c) => {
     
     // Return user data (without password)
     const { password_hash, ...userResponse } = newUser;
+    console.log('Registration successful for:', userResponse.email);
     return c.json({ user: userResponse });
     
   } catch (error) {
     console.error("Registration error:", error);
-    return c.json({ error: "Registration failed" }, 500);
+    return c.json({ error: "Registration failed", details: error instanceof Error ? error.message : 'Unknown error' }, 500);
   }
 });
 

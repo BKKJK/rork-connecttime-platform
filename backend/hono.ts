@@ -10,10 +10,19 @@ const app = new Hono();
 
 // Enable CORS for all routes
 app.use("*", cors({
-  origin: (origin) => origin || "*",
+  origin: (origin) => {
+    console.log('CORS origin:', origin);
+    return origin || "*";
+  },
   credentials: true,
-  allowHeaders: ['Content-Type', 'Authorization']
+  allowHeaders: ['Content-Type', 'Authorization', 'Cookie']
 }));
+
+// Add request logging
+app.use("*", async (c, next) => {
+  console.log(`${c.req.method} ${c.req.url}`);
+  await next();
+});
 
 // Mount auth routes
 app.route("/auth", authRoutes);
@@ -22,7 +31,7 @@ app.route("/auth", authRoutes);
 app.use(
   "/trpc/*",
   trpcServer({
-    endpoint: "/api/trpc",
+    endpoint: "/trpc",
     router: appRouter,
     createContext,
   })
@@ -30,7 +39,13 @@ app.use(
 
 // Simple health check endpoint
 app.get("/", (c) => {
-  return c.json({ status: "ok", message: "API is running" });
+  return c.json({ status: "ok", message: "ConnectTime API is running", timestamp: new Date().toISOString() });
+});
+
+// Catch-all for debugging
+app.all("*", (c) => {
+  console.log(`Unhandled route: ${c.req.method} ${c.req.url}`);
+  return c.json({ error: "Route not found", path: c.req.url }, 404);
 });
 
 export default app;
