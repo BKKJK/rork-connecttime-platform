@@ -8,38 +8,37 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors } from '@/constants/colors';
-import { LogIn, UserPlus } from 'lucide-react-native';
-
-
+import { User } from 'lucide-react-native';
 
 export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
         <View style={styles.header}>
-          <Text style={styles.title}>ConnectTime</Text>
+          <View style={styles.iconContainer}>
+            <User size={48} color={Colors.gray400} />
+          </View>
+          <Text style={styles.title}>Welcome to ConnectTime</Text>
           <Text style={styles.subtitle}>
-            Connect with professionals for personalized sessions
+            Sign in to access your profile and manage your bookings
           </Text>
         </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
             style={styles.primaryButton}
-            onPress={() => router.push('/auth/register')}
-            testID="create-account-button"
+            onPress={() => router.push('/auth/login')}
+            testID="sign-in-button"
           >
-            <UserPlus size={20} color={Colors.white} style={styles.buttonIcon} />
-            <Text style={styles.primaryButtonText}>Create Account</Text>
+            <Text style={styles.primaryButtonText}>Sign In</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
             style={styles.secondaryButton}
-            onPress={() => router.push('/auth/login')}
-            testID="sign-in-button"
+            onPress={() => router.push('/auth/register')}
+            testID="create-account-button"
           >
-            <LogIn size={20} color={Colors.primary} style={styles.buttonIcon} />
-            <Text style={styles.secondaryButtonText}>Sign In</Text>
+            <Text style={styles.secondaryButtonText}>Create Account</Text>
           </TouchableOpacity>
         </View>
 
@@ -63,18 +62,28 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 24,
+    paddingHorizontal: 40,
     justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
-    marginBottom: 64,
+    marginBottom: 80,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.backgroundSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '700' as const,
     color: Colors.text,
-    marginBottom: 12,
+    marginBottom: 16,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
@@ -85,14 +94,13 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     gap: 16,
-    marginBottom: 48,
+    marginBottom: 60,
   },
   primaryButton: {
     backgroundColor: Colors.primary,
-    paddingVertical: 16,
+    paddingVertical: 18,
     paddingHorizontal: 24,
     borderRadius: 12,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: Colors.primary,
@@ -102,18 +110,14 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   secondaryButton: {
-    backgroundColor: Colors.white,
-    paddingVertical: 16,
+    backgroundColor: 'transparent',
+    paddingVertical: 18,
     paddingHorizontal: 24,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: Colors.border,
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  buttonIcon: {
-    marginRight: 8,
   },
   primaryButtonText: {
     color: Colors.white,

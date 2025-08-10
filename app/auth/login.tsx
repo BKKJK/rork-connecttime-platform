@@ -58,7 +58,7 @@ export default function LoginScreen() {
         email: formData.email.trim().toLowerCase(),
         password: formData.password,
       });
-      router.replace('/(tabs)');
+      // Navigation will be handled by the auth guard in _layout.tsx
     } catch (err) {
       console.error('Login failed:', err);
     }
@@ -160,7 +160,7 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account?</Text>
+            <Text style={styles.footerText}>Don&apos;t have an account?</Text>
             <Button
               title="Create Account"
               onPress={handleRegisterPress}
