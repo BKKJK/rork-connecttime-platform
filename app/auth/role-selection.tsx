@@ -10,7 +10,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Button } from '@/components/ui/Button';
 import { Colors } from '@/constants/colors';
-import { Users, UserCheck, ArrowRight } from 'lucide-react-native';
+import { Users, UserCheck } from 'lucide-react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -20,8 +20,11 @@ export default function RoleSelectionScreen() {
   const handleContinue = () => {
     if (!selectedRole) return;
     
-    // For now, redirect to main app - setup screens will be created later
-    router.replace('/(tabs)');
+    if (selectedRole === 'client') {
+      router.push('/auth/client-setup');
+    } else {
+      router.push('/auth/provider-setup');
+    }
   };
 
   return (

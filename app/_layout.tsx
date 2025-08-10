@@ -17,8 +17,13 @@ function RootLayoutNav() {
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="provider/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="booking/[providerId]" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/welcome" options={{ headerShown: false }} />
       <Stack.Screen name="auth/login" options={{ headerShown: false }} />
       <Stack.Screen name="auth/register" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/role-selection" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/client-setup" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/provider-setup" options={{ headerShown: false }} />
+      <Stack.Screen name="auth/completion" options={{ headerShown: false }} />
       <Stack.Screen name="modal" options={{ presentation: "modal" }} />
     </Stack>
   );

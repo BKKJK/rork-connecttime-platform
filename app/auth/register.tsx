@@ -87,7 +87,7 @@ export default function RegisterScreen() {
         password: formData.password,
         role: 'client', // Default to client, will be changed in role selection
       });
-      router.replace('/(tabs)'); // Temporary redirect until role selection is created
+      router.push('/auth/role-selection');
     } catch (err) {
       console.error('Registration failed:', err);
     }
