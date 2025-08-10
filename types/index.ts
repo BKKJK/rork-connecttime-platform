@@ -53,6 +53,43 @@ export interface User {
   email_verified: boolean;
   created_at: string;
   updated_at: string;
+  bio?: string;
+  location?: string;
+  phone?: string;
+}
+
+export interface PaymentMethod {
+  id: string;
+  type: 'card' | 'apple_pay' | 'google_pay';
+  last4?: string;
+  brand?: string;
+  expiryMonth?: number;
+  expiryYear?: number;
+  isDefault: boolean;
+  created_at: string;
+}
+
+export interface EarningsData {
+  totalEarnings: number;
+  thisMonth: number;
+  lastMonth: number;
+  pendingPayouts: number;
+  completedSessions: number;
+  averageRating: number;
+  monthlyData: {
+    month: string;
+    earnings: number;
+    sessions: number;
+  }[];
+}
+
+export interface ProfileStats {
+  totalBookings: number;
+  completedSessions: number;
+  totalSpent: number;
+  favoriteProviders: number;
+  averageRating?: number;
+  reviewCount?: number;
 }
 
 // Auth API Types

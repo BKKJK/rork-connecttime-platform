@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { 
   User, 
@@ -9,12 +9,21 @@ import {
   Star, 
   Shield,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  Bell,
+  HelpCircle,
+  FileText
 } from 'lucide-react-native';
 import { Colors } from '@/constants/colors';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/contexts/AuthContext';
+import { ProfileHeader } from '@/components/profile/ProfileHeader';
+import { EarningsCard } from '@/components/profile/EarningsCard';
+import { ClientStatsCard } from '@/components/profile/ClientStatsCard';
+import { PaymentMethodsSection } from '@/components/profile/PaymentMethodsSection';
+import { trpc } from '@/lib/trpc';
+import type { PaymentMethod } from '@/types';
 
 const menuItems = [
   { icon: Calendar, title: 'My Bookings', subtitle: 'View upcoming and past sessions' },
